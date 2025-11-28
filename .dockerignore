@@ -1,0 +1,6 @@
+var/
+vendor/
+composer.lock
+*.md
+.env*
+!.env.prod

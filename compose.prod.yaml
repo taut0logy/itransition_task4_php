@@ -1,0 +1,43 @@
+# Docker Compose for Production
+services:
+  app:
+    build: .
+    ports:
+      - "8080:80"
+    environment:
+      APP_ENV: prod
+      APP_SECRET: ${APP_SECRET}
+      DEFAULT_URI: ${DEFAULT_URI}
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@database:5432/${POSTGRES_DB}?serverVersion=17&charset=utf8
+      MESSENGER_TRANSPORT_DSN: doctrine://default?auto_setup=0
+      MAILER_DSN: ${MAILER_DSN}
+    depends_on:
+      database:
+        condition: service_healthy
+    restart: unless-stopped
+
+  database:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-app}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_USER: ${POSTGRES_USER:-app}
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "pg_isready",
+          "-d",
+          "${POSTGRES_DB:-app}",
+          "-U",
+          "${POSTGRES_USER:-app}",
+        ]
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+    volumes:
+      - database_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+volumes:
+  database_data:
