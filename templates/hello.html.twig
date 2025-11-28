@@ -1,0 +1,27 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Hello {{ name }}{% endblock %}
+
+{% block body %}
+<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600">
+    <div class="bg-white rounded-lg shadow-2xl p-8 max-w-md w-full">
+        <h1 class="text-4xl font-bold text-gray-800 mb-4 text-center">
+            {{ greeting }}, {{ name }}!
+        </h1>
+        <p class="text-gray-600 text-center mb-6">
+            Welcome to your Symfony 7.4 application with Tailwind CSS
+        </p>
+        <div class="flex gap-4 justify-center">
+            <a href="{{ path('app_hello', {name: 'Developer'}) }}"
+               class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition">
+                Say Hello
+            </a>
+            <a href="{{ path('app_hello', {name: 'World', greeting: 'Hi'}) }}"
+               class="px-6 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition">
+                Say Hi
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
