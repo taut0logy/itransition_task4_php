@@ -58,7 +58,7 @@ class AuthController extends AbstractController
                     ], UrlGeneratorInterface::ABSOLUTE_URL);
 
                     $email = (new Email())
-                        ->from(new Address('noreply@app.task4', 'User Management App'))
+                        ->from(new Address($this->getParameter('mailer_from'), 'User Management App'))
                         ->to($user->getEmail())
                         ->subject('Verify your email address')
                         ->html("<p>Please verify your email by clicking: <a href=\"{$verifyUrl}\">Verify Email</a></p>");

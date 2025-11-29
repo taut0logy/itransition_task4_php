@@ -34,9 +34,7 @@ COPY prod/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
 
-RUN php bin/console cache:clear --env=prod \
-    && php bin/console cache:warmup --env=prod \
-    && php bin/console tailwind:build
+RUN php bin/console tailwind:build
 
 EXPOSE 80
 
