@@ -4,6 +4,7 @@ services:
     build: .
     ports:
       - "8080:80"
+    image: taut0logy/itransition_task4_app:latest
     depends_on:
       database:
         condition: service_healthy
