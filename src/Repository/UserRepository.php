@@ -30,12 +30,20 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         $this->getEntityManager()->flush();
     }
 
-    public function findAllOrderedByLastLogin(): array
+    public function findPaginated(int $page = 1, int $perPage = 10): array
     {
-        return $this->createQueryBuilder('u')
+        $qb = $this->createQueryBuilder('u')
             ->orderBy('u.lastLoginAt', 'DESC')
-            ->getQuery()
-            ->getResult();
+            ->setFirstResult(($page - 1) * $perPage)
+            ->setMaxResults($perPage);
+
+        return [
+            'users' => $qb->getQuery()->getResult(),
+            'total' => $this->count([]),
+            'page' => $page,
+            'perPage' => $perPage,
+            'totalPages' => (int) ceil($this->count([]) / $perPage)
+        ];
     }
 
     public function findByVerificationToken(string $token): ?User

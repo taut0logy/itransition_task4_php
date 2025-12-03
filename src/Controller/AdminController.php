@@ -14,13 +14,14 @@ use Symfony\Component\Routing\Attribute\Route;
 class AdminController extends AbstractController
 {
     #[Route('/', name: 'admin_users')]
-    public function index(UserRepository $userRepository): Response
+    public function index(Request $request, UserRepository $userRepository): Response
     {
-        $users = $userRepository->findAllOrderedByLastLogin();
+        $page = max(1, (int) $request->query->get('page', 1));
+        $perPage = max(1, min(100, (int) $request->query->get('perPage', 10)));
 
-        return $this->render('admin/users.html.twig', [
-            'users' => $users,
-        ]);
+        $pagination = $userRepository->findPaginated($page, $perPage);
+
+        return $this->render('admin/users.html.twig', $pagination);
     }
 
     #[Route('/users/action', name: 'users_bulk_action', methods: ['POST'])]
