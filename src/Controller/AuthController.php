@@ -36,7 +36,6 @@ class AuthController extends AbstractController
             $name = $request->request->get('name');
             $password = $request->request->get('password');
 
-            // Validate
             if (empty($email) || empty($name) || empty($password)) {
                 $error = 'All fields are required';
             } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
@@ -81,7 +80,7 @@ class AuthController extends AbstractController
     }
 
     #[Route('/login', name: 'login')]
-    public function login(AuthenticationUtils $authUtils): Response
+    public function login(AuthenticationUtils $authUtils, Request $request): Response
     {
         if ($this->getUser()) {
             return $this->redirectToRoute('admin_users');
@@ -89,6 +88,10 @@ class AuthController extends AbstractController
 
         $error = $authUtils->getLastAuthenticationError();
         $lastUsername = $authUtils->getLastUsername();
+
+        if ($request->query->get('blocked')) {
+            $this->addFlash('error', 'Your account has been blocked.');
+        }
 
         return $this->render('auth/login.html.twig', [
             'last_username' => $lastUsername,
