@@ -47,22 +47,40 @@
             </div>
         {% endfor %}
 
+        <dialog id="confirmModal" class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-lg shadow-xl p-5 w-96 backdrop:bg-black backdrop:opacity-50">
+            <div class="text-center">
+                <div id="modalIcon" class="mx-auto flex items-center justify-center h-12 w-12 rounded-full">
+                    <i id="modalIconElement" class="text-xl"></i>
+                </div>
+                <h3 id="modalTitle" class="text-lg leading-6 font-medium text-gray-900 mt-4"></h3>
+                <p id="modalMessage" class="text-sm text-gray-500 mt-2 px-4"></p>
+                <div class="flex gap-3 mt-6">
+                    <button onclick="closeModal()" class="flex-1 px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300">
+                        Cancel
+                    </button>
+                    <button id="modalConfirmBtn" onclick="confirmAction()" class="flex-1 px-4 py-2 text-white rounded-md">
+                        Confirm
+                    </button>
+                </div>
+            </div>
+        </dialog>
+
         <div class="bg-white rounded-lg shadow">
             <form id="userForm" method="post" action="{{ path('users_bulk_action') }}">
                 <input type="hidden" name="_token" value="{{ csrf_token('bulk_action') }}">
+                <input type="hidden" id="confirmAction" name="action" value="">
 
                 <div class="p-4 border-b border-gray-200 flex gap-2">
-                    <button type="submit" name="action" value="block"
+                    <button type="button" onclick="showConfirmModal('block')" title="Block selected users"
                             class="px-4 py-2 border-2 border-yellow-500 text-yellow-500 rounded hover:border-yellow-600 hover:text-yellow-600 transition">
                         <i class="fas fa-ban"></i>
                     </button>
-                    <button type="submit" name="action" value="unblock"
+                    <button type="button" onclick="showConfirmModal('unblock')" title="Unblock selected users"
                             class="px-4 py-2 border-2 border-green-500 text-green-500 rounded hover:border-green-600 hover:text-green-600 transition">
                         <i class="fas fa-unlock"></i>
                     </button>
-                    <button type="submit" name="action" value="delete"
-                            class="px-4 py-2 border-2 border-red-500 text-red-500 rounded hover:border-red-600 hover:text-red-600 transition"
-                            onclick="return confirm('Are you sure you want to delete selected users?')">
+                    <button type="button" onclick="showConfirmModal('delete')" title="Delete selected users"
+                            class="px-4 py-2 border-2 border-red-500 text-red-500 rounded hover:border-red-600 hover:text-red-600 transition">
                         <i class="fas fa-trash"></i>
                     </button>
                 </div>
@@ -184,6 +202,60 @@ function changePerPage(value) {
     url.searchParams.set('perPage', value);
     url.searchParams.set('page', '1');
     window.location = url;
+}
+
+let pendingAction = null;
+
+function showConfirmModal(action) {
+    const checked = document.querySelectorAll('.user-checkbox:checked');
+    if (checked.length === 0) return;
+
+    pendingAction = action;
+    const modal = document.getElementById('confirmModal');
+    const config = {
+        block: {
+            icon: 'mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-yellow-100',
+            iconClass: 'fas fa-ban text-yellow-600 text-xl',
+            title: 'Block Users',
+            message: 'Are you sure you want to block the selected users? They will not be able to access the system.',
+            btnClass: 'bg-yellow-600 hover:bg-yellow-700'
+        },
+        unblock: {
+            icon: 'mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100',
+            iconClass: 'fas fa-unlock text-green-600 text-xl',
+            title: 'Unblock Users',
+            message: 'Are you sure you want to unblock the selected users? They will regain access to the system.',
+            btnClass: 'bg-green-600 hover:bg-green-700'
+        },
+        delete: {
+            icon: 'mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100',
+            iconClass: 'fas fa-exclamation-triangle text-red-600 text-xl',
+            title: 'Delete Users',
+            message: 'Are you sure you want to delete the selected users? This action cannot be undone.',
+            btnClass: 'bg-red-600 hover:bg-red-700'
+        }
+    };
+
+    const c = config[action];
+    document.getElementById('modalIcon').className = c.icon;
+    document.getElementById('modalIconElement').className = c.iconClass;
+    document.getElementById('modalTitle').textContent = c.title;
+    document.getElementById('modalMessage').textContent = c.message;
+    document.getElementById('modalConfirmBtn').className = `flex-1 px-4 py-2 text-white rounded-md ${c.btnClass}`;
+
+    modal.showModal();
+}
+
+function closeModal() {
+    document.getElementById('confirmModal').close();
+    pendingAction = null;
+}
+
+function confirmAction() {
+    if (pendingAction) {
+        document.getElementById('confirmAction').value = pendingAction;
+        document.getElementById('userForm').submit();
+    }
 }
 </script>
 {% endblock %}
